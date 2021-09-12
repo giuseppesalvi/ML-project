@@ -4,6 +4,7 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.lib.function_base import corrcoef
 
 
 def load_train():
@@ -111,35 +112,32 @@ def plot_features(D, L, save_name):
         3: 'entropy'
     }
 
-    # # plot the 4 features for both classes together
-    # for index in range(4):
-    #     plt.figure()
-    #     plt.xlabel(attributes[index])
-    #     plt.hist(D[index, :], bins=20, density=True, alpha=0.4,
-    #              label='all')
-    #     plt.legend()
-    #     plt.tight_layout()
-    #     plt.savefig('./images/%s_%d.pdf' % (save_name, index))
-    # plt.show()
-
-    # plot on the same histogram the data of the 2 different classes with different colors
+    # plot an histogram with all the data and the data of the two classes with different colors
     for index in range(4):
         plt.figure()
         plt.xlabel(attributes[index])
 
-        plt.hist(D[index, :], bins=20, density=True, alpha=1.0,
-                 label='all banknotes', color="black")
-        plt.hist(D0[index, :], bins=20, density=True, alpha=.4,
+        plt.hist(D0[index, :], bins=20, density=True, alpha=.9,
                  label='authentic banknotes', color="red")
-        plt.hist(D1[index, :], bins=20, density=True, alpha=.4,
+        plt.hist(D1[index, :], bins=20, density=True, alpha=.9,
                  label='fake banknotes', color="blue")
+        plt.hist(D[index, :], bins=20, density=True, alpha=.7,
+                 label='all banknotes', color="purple")
         plt.legend()
         plt.tight_layout()
-        plt.savefig('./images/%s_%d.pdf' % (save_name, index + 4))
+        plt.savefig('./images/%s_%d.pdf' % (save_name, index))
 
     plt.show()
 
     return
+
+
+def plot_heatmap_pearson(D, save_name):
+    pearson_matrix = corrcoef(D)
+    plt.imshow(pearson_matrix, cmap='Purples')
+    plt.savefig('./images/%s.pdf' % (save_name))
+    plt.show()
+    return pearson_matrix
 
 
 if __name__ == "__main__":
@@ -203,6 +201,18 @@ if __name__ == "__main__":
           (len(LHTR), C0_HTR, C1_HTR))
     print("TestH Dataset: total=%d, authentic(0)=%d, fake(1)=%d\n" % (
           len(LHTE), C0_HTE, C1_HTE))
+    print("-" * 74, "\n\n")
 
+    # Plot the features
     plot_features(DTR, LTR, "hist_DTR")
     plot_features(DHTR, LHTR, "hist_DHTR")
+
+    # Plot the correlation matrix using Pearson correlation coefficient and print the matrixes
+    corr_matrix_DTR = plot_heatmap_pearson(DTR, "corr_matrix_DTR")
+    corr_matrix_DHTR = plot_heatmap_pearson(DHTR, "corr_matrix_DHTR")
+    print("-" * 74)
+    print("Heat map correlation matrix Train dataset\n")
+    print(corr_matrix_DTR)
+    print("\nHeat map correlation matrix TrainH dataset\n\n")
+    print(corr_matrix_DHTR)
+    print("-" * 74, "\n\n")
