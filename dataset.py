@@ -1,5 +1,5 @@
 """
-	 In this module we have functions that interact with the data, (load data, analyze data, ...)
+	 In this module we have the functions that interact with the data
 """
 
 import numpy as np
@@ -140,6 +140,30 @@ def plot_heatmap_pearson(D, save_name):
     return pearson_matrix
 
 
+def split_db_2to1(D, L, seed=0):
+    """ Split the dataset in two parts, one is 2/3, the other is 1/3
+        first part will be used for model training, second part for evaluation
+        D is the dataset, L the corresponding labels
+        returns:
+        DTR = Dataset for training set
+        LTR = Labels for training set
+        DTE = Dataset for test set
+        LTE = Labels for test set
+    """
+    nTrain = int(D.shape[1]*2.0/3.0)
+    np.random.seed(seed)
+    idx = np.random.permutation(D.shape[1])
+    idxTrain = idx[0:nTrain]
+    idxTest = idx[nTrain:]
+
+    DTR = D[:, idxTrain]
+    DTE = D[:, idxTest]
+    LTR = L[idxTrain]
+    LTE = L[idxTest]
+
+    return (DTR, LTR), (DTE, LTE)
+
+
 if __name__ == "__main__":
 
     # Load Train dataset from Train.txt and print it
@@ -207,7 +231,7 @@ if __name__ == "__main__":
     plot_features(DTR, LTR, "hist_DTR")
     plot_features(DHTR, LHTR, "hist_DHTR")
 
-    # Plot the correlation matrix using Pearson correlation coefficient and print the matrixes
+    # Plot the correlation matrix using Pearson correlation coefficient and print the matrices
     corr_matrix_DTR = plot_heatmap_pearson(DTR, "corr_matrix_DTR")
     corr_matrix_DHTR = plot_heatmap_pearson(DHTR, "corr_matrix_DHTR")
     print("-" * 74)
