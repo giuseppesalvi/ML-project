@@ -18,8 +18,8 @@ FLAG_KFOLD = True
 
 FLAG_GAUSSIANS = False 
 FLAG_LOGREG = False 
-FLAG_SVM = True 
-FLAG_GMM = False
+FLAG_SVM = False 
+FLAG_GMM = True 
 
 if __name__ == "__main__":
 
@@ -145,8 +145,8 @@ if __name__ == "__main__":
 
         
     # K-FOLD
-    K = 5 
-    # K = LTR.size
+    K = 20 
+    #K = LTR.size
     if FLAG_KFOLD:
 
         print("-" * 50)
@@ -229,6 +229,22 @@ if __name__ == "__main__":
                             llr, labels = k_fold(DHTR, LHTR, K, svm_kernel_RBF, (K_, C, g))
                             DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
                             print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K, C, g, DCF_min)," (noise version)\n")
+
+            # GMM
+            if FLAG_GMM:
+                psi = 0.01
+                M_list = [2, 4, 8, 16]
+                versions = ["full", "diagonal", "naive"]
+                for version in versions:
+                    for M in M_list:
+                        llr, labels = k_fold(DTR, LTR, K, GMM_classifier, (M, psi, version))
+                        DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                        print("GMM: version = %s, M = %d, psi = %f, minDCF = %f" % (version, M, psi, DCF_min), "\n")
+
+                        llr, labels = k_fold(DHTR, LHTR, K, GMM_classifier, (M, psi, version))
+                        DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                        print("GMM: version = %s, M = %d, psi = %f, minDCF = %f" % (version, M, psi, DCF_min), " (noise version)\n")
+
 
 
 
