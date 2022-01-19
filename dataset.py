@@ -1,5 +1,5 @@
 """
-	 In this module we have the functions that interact with the data
+    This module contains the functions that interact with the dataset
 """
 
 import numpy as np

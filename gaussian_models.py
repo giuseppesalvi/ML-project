@@ -1,5 +1,5 @@
 """
-    In these module we have the implementations of the gaussian models:
+    This module contains the implementations of the Gaussian Models:
     multivariate gaussian model(MVG), naive bayes and tied
 """
 import numpy as np
