@@ -47,5 +47,4 @@ def logistic_regression(DTR, LTR, DTE, l):
     # the score s(xt) = wT xt + b
     # compute the array of scores S
     S = np.dot(x[0:-1].T, DTE) + x[-1]
-    
     return S

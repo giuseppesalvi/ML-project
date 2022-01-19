@@ -150,7 +150,7 @@ def split_db_2to1(D, L, seed=0):
         DTE = Dataset for test set
         LTE = Labels for test set
     """
-    nTrain = int(D.shape[1]*2.0/3.0)
+    nTrain = int(D.shape[1]*2.0 / 3.0)
     np.random.seed(seed)
     idx = np.random.permutation(D.shape[1])
     idxTrain = idx[0:nTrain]

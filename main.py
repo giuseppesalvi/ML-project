@@ -8,6 +8,8 @@ from logistic_regression import logistic_regression
 from measuring_predictions import minimum_detection_cost
 from numpy.lib.scimath import log
 
+from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
+
 
 if __name__ == "__main__":
 
@@ -21,9 +23,9 @@ if __name__ == "__main__":
     print("COMPUTING minDCF for various models...\n\n")
    
     # 3 applications: main balanced one and two unbalanced
-    applications = [[0.5, 1, 1], [0.1, 1, 1], [0.9, 1, 1]]
+    #applications = [[0.5, 1, 1], [0.1, 1, 1], [0.9, 1, 1]]
+    applications = [[0.5, 1, 1]]
 
-    generative_models = [("MVG", multivariate_gaussian_classifier2), ("Naive", naive_bayes_gaussian_classifier), ("Tied", tied_covariance_gaussian_classifier)]
 
 
     # SINGLE FOLD
@@ -40,6 +42,8 @@ if __name__ == "__main__":
     print("SINGLE FOLD")
     print("-" * 50, "\n\n")
 
+    flag = 1
+
 
     for app in applications:
         pi1, Cfn, Cfp = app
@@ -48,12 +52,16 @@ if __name__ == "__main__":
         print("-" * 50, "\n")
 
         # Gaussian Models
-        #print("-" * 50)
-        #print("GENERATIVE MODELS")
-        #print("-" * 50, "\n\n")
+
+        generative_models = [("MVG", multivariate_gaussian_classifier2), ("Naive", naive_bayes_gaussian_classifier), ("Tied", tied_covariance_gaussian_classifier)]
         for name, algo in generative_models:
             DCF_min = minimum_detection_cost(algo(DTR_T, LTR_T, DTR_E), LTR_E, pi1, Cfn, Cfp)
             print("%s: minDCF = %f" %(name,DCF_min),"\n") # 0.0 for MVG and tied!!
+            if flag == 1:
+                if DCF_min != 0:
+                    flag = 2
+                else: 
+                    flag = 0
 
             DCF_min = minimum_detection_cost(algo(DHTR_T, LHTR_T, DHTR_E), LHTR_E, pi1, Cfn, Cfp)
             print("%s: minDCF = %f" %(name,DCF_min)," (noise version)\n") 
@@ -75,9 +83,41 @@ if __name__ == "__main__":
             # the empirical prior log-odds of the training set (slide 31)
             llr = S - log(pi1/ (1-pi1))
             DCF_min = minimum_detection_cost(llr, LHTR_E, pi1, Cfn, Cfp)
-            print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"(noise version)\n") # 0.0 for MVG and tied!!
+            print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") # 0.0 for MVG and tied!!
+
+        # SVM
+        # Linear
+        K_list = [1, 10]
+        C_list = [1.0, 10.0]
+        for K in K_list:
+            for C in C_list:
+                DCF_min = minimum_detection_cost(svm_linear(DTR_T, LTR_T, DTR_E, K, C), LTR_E, pi1, Cfn, Cfp)
+                print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K, C, DCF_min),"\n")
+                DCF_min = minimum_detection_cost(svm_linear(DHTR_T, LHTR_T, DHTR_E, K, C), LHTR_E, pi1, Cfn, Cfp)
+                print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K, C, DCF_min)," (noise version)\n")
+        # Polynomial Kernel
+        c_list = [0,1]
+        for K in K_list:
+            for C in C_list:
+                for c in c_list:
+                    DCF_min = minimum_detection_cost(svm_kernel_polynomial(DTR_T, LTR_T, DTR_E, K, C, d=2, c=c), LTR_E, pi1, Cfn, Cfp)
+                    print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, minDCF = %f" %(K, C, c, DCF_min),"\n")
+                    DCF_min = minimum_detection_cost(svm_kernel_polynomial(DHTR_T, LHTR_T, DHTR_E, K, C, d=2, c=c), LHTR_E, pi1, Cfn, Cfp)
+                    print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, minDCF = %f" %(K, C, c, DCF_min)," (noise version)\n")
+        # RBF Kernel
+        g_list = [1, 10]
+        for K in K_list:
+            for C in C_list:
+                for g in g_list:
+                    DCF_min = minimum_detection_cost(svm_kernel_RBF(DTR_T, LTR_T, DTR_E, K, C, g=g), LTR_E, pi1, Cfn, Cfp)
+                    print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K, C, g, DCF_min),"\n")
+                    DCF_min = minimum_detection_cost(svm_kernel_RBF(DHTR_T, LHTR_T, DHTR_E, K, C, g=g), LHTR_E, pi1, Cfn, Cfp)
+                    print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K, C, g, DCF_min)," (noise version)\n")
 
 
+
+
+    print("\n\n\n", flag)
 
         
     # K-FOLD
