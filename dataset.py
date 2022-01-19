@@ -5,6 +5,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.lib.function_base import corrcoef
+from logistic_regression import logistic_regression
+from measuring_predictions import minimum_detection_cost
+from numpy.lib.scimath import log
 
 
 def load_train():
@@ -162,6 +165,69 @@ def split_db_2to1(D, L, seed=0):
     LTE = L[idxTest]
 
     return (DTR, LTR), (DTE, LTE)
+
+def k_fold(D, L, K, algorithm, params=None, seed=0):
+    """ implementation of the k-fold cross validation approach
+        D is the dataset, L the labels, K the number of folds
+        pi1, Cfn, Cfp are the parameters of the application
+        algorithm is the algorithm used as classifier
+        params are the additional parameters like hyperparameters
+        return the llr and labels
+    """
+    sizePartitions = int(D.shape[1]/K)
+    np.random.seed(seed)
+
+    # permutate the indexes of the samples
+    idx_permutation = np.random.permutation(D.shape[1])
+
+    # put the indexes inside different partitions
+    idx_partitions = []
+    for i in range(0, D.shape[1], sizePartitions):
+        idx_partitions.append(list(idx_permutation[i:i+sizePartitions]))
+
+    
+    all_llr= []
+    all_labels = []
+
+    # for each fold, consider the ith partition in the test set
+    # the other partitions in the train set
+    for i in range(K):
+        # keep the i-th partition for test
+        # keep the other partitions for train
+        idx_test = idx_partitions[i]
+        idx_train = idx_partitions[0:i] + idx_partitions[i+1:]
+
+        # from lists of lists collapse the elemnts in a single list
+        idx_train = sum(idx_train, [])
+
+        # partition the data and labels using the already partitioned indexes
+        DTR = D[:, idx_train]
+        DTE = D[:, idx_test]
+        LTR = L[idx_train]
+        LTE = L[idx_test]
+
+        # calculate scores
+        if params is not None:
+            llr = algorithm(DTR, LTR, DTE, *params)
+        else:
+            llr = algorithm(DTR, LTR, DTE)
+
+        # add scores and labels for this fold in total
+        all_llr.append(llr)
+        all_labels.append(LTE)
+
+
+    all_llr = np.hstack(all_llr) 
+    all_labels = np.hstack(all_labels)
+
+    #if algorithm == logistic_regression:
+        ## We can recover log-likelihood ratios by subtracting from the score s
+        ## the empirical prior log-odds of the training set (slide 31)
+        #all_llr = all_llr - log(pi1/ (1-pi1))   
+
+    #DCF_min = minimum_detection_cost(all_llr, all_labels, pi1, Cfn, Cfp) 
+    
+    return all_llr, all_labels 
 
 
 if __name__ == "__main__":
