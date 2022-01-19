@@ -16,9 +16,9 @@ from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 FLAG_SINGLEFOLD = False 
 FLAG_KFOLD = True
 
-FLAG_GAUSSIANS = True 
-FLAG_LOGREG = True 
-FLAG_SVM = False
+FLAG_GAUSSIANS = False 
+FLAG_LOGREG = False 
+FLAG_SVM = True 
 FLAG_GMM = False
 
 if __name__ == "__main__":
@@ -100,7 +100,7 @@ if __name__ == "__main__":
             # SVM
 
             if FLAG_SVM:
-             # Linear
+                # Linear
                 K_list = [1, 10]
                 C_list = [1.0, 10.0]
                 for K in K_list:
@@ -145,8 +145,8 @@ if __name__ == "__main__":
 
         
     # K-FOLD
-    #K = 5 
-    K = LTR.size
+    K = 5 
+    # K = LTR.size
     if FLAG_KFOLD:
 
         print("-" * 50)
@@ -190,6 +190,46 @@ if __name__ == "__main__":
                     llr = S - log(pi1/ (1-pi1))
                     DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
                     print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") 
+
+            # SVM
+            if FLAG_SVM:
+                # Linear
+                K_list = [1, 10]
+                C_list = [1.0, 10.0]
+                for K_ in K_list:
+                    for C in C_list:
+                        llr, labels = k_fold(DTR, LTR, K, svm_linear, (K_, C))
+                        DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                        print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K, C, DCF_min),"\n")
+
+                        llr, labels = k_fold(DHTR, LHTR, K, svm_linear, (K_, C))
+                        DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                        print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K, C, DCF_min)," (noise version)\n")
+                # Polynomial Kernel
+                c_list = [0,1]
+                for K_ in K_list:
+                    for C in C_list:
+                        for c in c_list:
+                            llr, labels = k_fold(DTR, LTR, K, svm_kernel_polynomial, (K_, C, 2, c))
+                            DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                            print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, minDCF = %f" %(K_, C, c, DCF_min),"\n")
+
+                            llr, labels = k_fold(DHTR, LHTR, K, svm_kernel_polynomial, (K_, C, 2, c))
+                            DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                            print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, minDCF = %f" %(K_, C, c, DCF_min)," (noise version)\n")
+                # RBF Kernel
+                g_list = [1, 10]
+                for K_ in K_list:
+                    for C in C_list:
+                        for g in g_list:
+                            llr, labels = k_fold(DTR, LTR, K, svm_kernel_RBF, (K_, C, g))
+                            DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                            print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K, C, g, DCF_min),"\n")
+
+                            llr, labels = k_fold(DHTR, LHTR, K, svm_kernel_RBF, (K_, C, g))
+                            DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                            print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K, C, g, DCF_min)," (noise version)\n")
+
 
 
 
