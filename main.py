@@ -13,13 +13,13 @@ from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 
 
 # Flags to execute only some algorithms
-FLAG_SINGLEFOLD = False 
-FLAG_KFOLD = True
+FLAG_SINGLEFOLD = True 
+FLAG_KFOLD = True 
 
 FLAG_GAUSSIANS = False 
 FLAG_LOGREG = False 
-FLAG_SVM = False 
-FLAG_GMM = True 
+FLAG_SVM = True 
+FLAG_GMM = False 
 
 if __name__ == "__main__":
 
@@ -79,7 +79,6 @@ if __name__ == "__main__":
                 print("")
 
             # Logistic Regression
-
             if FLAG_LOGREG:
                 lambda_list = [0., 1e-6, 1e-3, 1.]
                 for l in lambda_list:
@@ -98,11 +97,10 @@ if __name__ == "__main__":
                     print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") # 0.0 for MVG and tied!!
 
             # SVM
-
             if FLAG_SVM:
                 # Linear
                 K_list = [1, 10]
-                C_list = [1.0, 10.0]
+                C_list = [0.1, 1.0, 10.0]
                 for K in K_list:
                     for C in C_list:
                         DCF_min = minimum_detection_cost(svm_linear(DTR_T, LTR_T, DTR_E, K, C), LTR_E, pi1, Cfn, Cfp)
@@ -133,7 +131,7 @@ if __name__ == "__main__":
             if FLAG_GMM:
                 psi = 0.01
                 M_list = [2, 4, 8, 16]
-                versions = ["full", "diagonal", "naive"]
+                versions = ["full", "diagonal", "tied"]
                 for version in versions:
                     for M in M_list:
                         DCF_min = minimum_detection_cost(GMM_classifier(DTR_T, LTR_T, DTR_E, M, psi, version=version), LTR_E, pi1, Cfn, Cfp)
@@ -145,10 +143,10 @@ if __name__ == "__main__":
 
         
     # K-FOLD
-    K = 20 
+    K = 5
     #K = LTR.size
     if FLAG_KFOLD:
-
+    
         print("-" * 50)
         print("K FOLD: K = %d" %(K))
         print("-" * 50, "\n\n")
@@ -184,7 +182,7 @@ if __name__ == "__main__":
                     DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
                     print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"\n") 
 
-                    S, labels = k_fold(DTR, LTR, K, logistic_regression, (l,))
+                    S, labels = k_fold(DHTR, LHTR, K, logistic_regression, (l,))
                     # We can recover log-likelihood ratios by subtracting from the score s
                     # the empirical prior log-odds of the training set (slide 31)
                     llr = S - log(pi1/ (1-pi1))
@@ -195,16 +193,16 @@ if __name__ == "__main__":
             if FLAG_SVM:
                 # Linear
                 K_list = [1, 10]
-                C_list = [1.0, 10.0]
+                C_list = [0.1, 1.0, 10.0]
                 for K_ in K_list:
                     for C in C_list:
                         llr, labels = k_fold(DTR, LTR, K, svm_linear, (K_, C))
                         DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
-                        print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K, C, DCF_min),"\n")
+                        print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K_, C, DCF_min),"\n")
 
                         llr, labels = k_fold(DHTR, LHTR, K, svm_linear, (K_, C))
                         DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
-                        print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K, C, DCF_min)," (noise version)\n")
+                        print("SVM Linear: K = %f, C = %f, minDCF = %f" %(K_, C, DCF_min)," (noise version)\n")
                 # Polynomial Kernel
                 c_list = [0,1]
                 for K_ in K_list:
@@ -224,17 +222,17 @@ if __name__ == "__main__":
                         for g in g_list:
                             llr, labels = k_fold(DTR, LTR, K, svm_kernel_RBF, (K_, C, g))
                             DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
-                            print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K, C, g, DCF_min),"\n")
+                            print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K_, C, g, DCF_min),"\n")
 
                             llr, labels = k_fold(DHTR, LHTR, K, svm_kernel_RBF, (K_, C, g))
                             DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
-                            print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K, C, g, DCF_min)," (noise version)\n")
+                            print("SVM RBF Kernel: K = %f, C = %f, g = %f, minDCF = %f" %(K_, C, g, DCF_min)," (noise version)\n")
 
             # GMM
             if FLAG_GMM:
                 psi = 0.01
                 M_list = [2, 4, 8, 16]
-                versions = ["full", "diagonal", "naive"]
+                versions = ["full", "diagonal", "tied"]
                 for version in versions:
                     for M in M_list:
                         llr, labels = k_fold(DTR, LTR, K, GMM_classifier, (M, psi, version))
