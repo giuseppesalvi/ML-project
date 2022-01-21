@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # 3 applications: main balanced one and two unbalanced
     #applications = [[0.5, 1, 1], [0.1, 1, 1], [0.9, 1, 1]]
     #applications = [[0.5, 1, 1]]
-    applications = [[0.1, 1, 1]]
+    applications = [[0.9, 1, 1]]
 
 
     # SINGLE FOLD
