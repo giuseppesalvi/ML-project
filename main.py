@@ -16,10 +16,10 @@ from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 FLAG_SINGLEFOLD = True 
 FLAG_KFOLD = True 
 
-FLAG_GAUSSIANS = False 
-FLAG_LOGREG = False 
+FLAG_GAUSSIANS = True 
+FLAG_LOGREG = True
 FLAG_SVM = True 
-FLAG_GMM = False 
+FLAG_GMM = True 
 
 if __name__ == "__main__":
 
@@ -34,7 +34,8 @@ if __name__ == "__main__":
    
     # 3 applications: main balanced one and two unbalanced
     #applications = [[0.5, 1, 1], [0.1, 1, 1], [0.9, 1, 1]]
-    applications = [[0.5, 1, 1]]
+    #applications = [[0.5, 1, 1]]
+    applications = [[0.1, 1, 1]]
 
 
     # SINGLE FOLD
