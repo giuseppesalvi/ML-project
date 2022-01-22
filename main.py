@@ -20,8 +20,8 @@ FLAG_SINGLEFOLD = True
 FLAG_KFOLD = True 
 
 FLAG_GAUSSIANS = False
-FLAG_LOGREG = False 
-FLAG_SVM = True 
+FLAG_LOGREG = True
+FLAG_SVM = False 
 FLAG_GMM = False 
 
 if __name__ == "__main__":
