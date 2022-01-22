@@ -13,13 +13,13 @@ from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 
 
 # Flags to execute only some algorithms
-FLAG_SINGLEFOLD = True 
-FLAG_KFOLD = True 
+FLAG_SINGLEFOLD = False 
+FLAG_KFOLD = False 
 
 FLAG_GAUSSIANS = True 
-FLAG_LOGREG = True
-FLAG_SVM = True 
-FLAG_GMM = True 
+FLAG_LOGREG = True 
+FLAG_SVM = False 
+FLAG_GMM = False 
 
 if __name__ == "__main__":
 
@@ -34,8 +34,8 @@ if __name__ == "__main__":
    
     # 3 applications: main balanced one and two unbalanced
     #applications = [[0.5, 1, 1], [0.1, 1, 1], [0.9, 1, 1]]
-    #applications = [[0.5, 1, 1]]
-    applications = [[0.9, 1, 1]]
+    applications = [[0.5, 1, 1]]
+    #applications = [[0.9, 1, 1]]
 
 
     # SINGLE FOLD
@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
         
     # K-FOLD
-    K = 5
+    K = 5 
     #K = LTR.size
     if FLAG_KFOLD:
     
