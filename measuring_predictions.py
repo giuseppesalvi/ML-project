@@ -111,3 +111,24 @@ def minimum_detection_cost(llr, labels, pi1, Cfn, Cfp):
 
     return min_DCF
 
+
+def actual_detection_cost(llr, labels, pi1, Cfn, Cfp):
+    """ Compute the actual detection cost, given the binary
+        log likelihood ratios llr
+        labels is the array of labels
+        pi1, Cfn, Cfp are the parameters for the application
+    """
+
+    min_DCF = np.inf
+    # compare the log-likelihood ratio with  the optimal bayes decision threshold to predict the class
+    predictions = optimal_bayes_decisions(llr, pi1, Cfn, Cfp)
+
+    # compute the confusion matrix
+    conf = confusion_matrix(predictions, labels, 2)
+
+    # compute DCF_norm
+    DCF = empirical_bayes_risk(conf, pi1, Cfn, Cfp)
+    DCF_norm = normalized_detection_cost(DCF, pi1, Cfn, Cfp)
+
+    return DCF_norm 
+

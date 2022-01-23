@@ -6,23 +6,25 @@ from dataset import k_fold, load_train, load_test, load_trainH, load_testH, spli
 from gaussian_models import multivariate_gaussian_classifier2, naive_bayes_gaussian_classifier, tied_covariance_gaussian_classifier
 from gmm import GMM_classifier
 from logistic_regression import logistic_regression
-from measuring_predictions import minimum_detection_cost
+from measuring_predictions import minimum_detection_cost, actual_detection_cost 
 from numpy.lib.scimath import log
 
 from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 
 
 # Flags to execute only some algorithms
-FLAG_TRAINING = False
-FLAG_TESTING = True
+FLAG_TRAINING = True 
+FLAG_TESTING = False 
 
 FLAG_SINGLEFOLD = True 
 FLAG_KFOLD = True 
 
-FLAG_GAUSSIANS = False
-FLAG_LOGREG = True
+FLAG_GAUSSIANS = False 
+FLAG_LOGREG = False 
 FLAG_SVM = False 
 FLAG_GMM = False 
+
+FLAG_ACTUALDCF = True
 
 if __name__ == "__main__":
 
@@ -79,12 +81,6 @@ if __name__ == "__main__":
                     for name, algo in generative_models:
                         DCF_min = minimum_detection_cost(algo(DTR_T, LTR_T, DTR_E), LTR_E, pi1, Cfn, Cfp)
                         print("%s: minDCF = %f" %(name,DCF_min),"\n") # 0.0 for MVG and tied!!
-                        if flag == 1:
-                            if DCF_min != 0:
-                                flag = 2
-                            else: 
-                                flag = 0
-
                         DCF_min = minimum_detection_cost(algo(DHTR_T, LHTR_T, DHTR_E), LHTR_E, pi1, Cfn, Cfp)
                         print("%s: minDCF = %f" %(name,DCF_min)," (noise version)\n") 
                     print("")
@@ -150,7 +146,6 @@ if __name__ == "__main__":
                             DCF_min = minimum_detection_cost(GMM_classifier(DHTR_T, LHTR_T, DHTR_E, M, psi, version=version), LHTR_E, pi1, Cfn, Cfp)
                             print("GMM: version = %s, M = %d, psi = %f, minDCF = %f" % (version, M, psi, DCF_min), "(noise version)\n")
 
-            print("\n\n\n", flag) # TODO: remove
 
         
         # K-FOLD
@@ -164,6 +159,9 @@ if __name__ == "__main__":
 
             for app in applications:
                 pi1, Cfn, Cfp = app
+                print("-" * 50)
+                print("Application: pi1 = %.1f, Cfn = %d, Cfn = %d" % (pi1, Cfn, Cfp))
+                print("-" * 50, "\n")
 
                 # Gaussian Models
                 if FLAG_GAUSSIANS:
@@ -252,9 +250,98 @@ if __name__ == "__main__":
                             llr, labels = k_fold(DHTR, LHTR, K, GMM_classifier, (M, psi, version))
                             DCF_min = minimum_detection_cost(llr, labels, pi1, Cfn, Cfp)
                             print("GMM: version = %s, M = %d, psi = %f, minDCF = %f" % (version, M, psi, DCF_min), " (noise version)\n")
+
+        if FLAG_ACTUALDCF:
+            # Calculate Actual DCF for the chosen models
+            print("\n\nCOMPUTING actDCF for various models...\n\n")
+
+            print("-" * 50)
+            print("SINGLE FOLD")
+            print("-" * 50, "\n\n")
+
+            for app in applications:
+                pi1, Cfn, Cfp = app
+                print("-" * 50)
+                print("Application: pi1 = %.1f, Cfn = %d, Cfn = %d" % (pi1, Cfn, Cfp))
+                print("-" * 50, "\n")
+
+                # normal dataset
+
+                # MVG full
+                DCF_act= actual_detection_cost(multivariate_gaussian_classifier2(DTR_T, LTR_T, DTR_E), LTR_E, pi1, Cfn, Cfp)
+                print("%s: actDCF = %f" %("MVG",DCF_act),"\n")
+
+                # GMM full M = 2
+                DCF_act= actual_detection_cost(GMM_classifier(DTR_T, LTR_T, DTR_E, 2, 0.001, version="full"), LTR_E, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 2, 0.001, DCF_act), "\n")
+
+                # SVM RBF K=1, C=10, g=1
+                DCF_act = actual_detection_cost(svm_kernel_RBF(DTR_T, LTR_T, DTR_E, 1, 10, g=1), LTR_E, pi1, Cfn, Cfp)
+                print("SVM RBF Kernel: K = %f, C = %f, g = %f, actDCF = %f" %(1, 10, 1, DCF_act),"\n")
+                     
+                # degraded dataset
+
+                # GMM full M = 4
+                DCF_act= actual_detection_cost(GMM_classifier(DHTR_T, LHTR_T, DHTR_E, 4, 0.001, version="full"), LHTR_E, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 4, 0.001, DCF_act), " (noise version)\n")
+
+                # GMM diagonal M = 16
+                DCF_act= actual_detection_cost(GMM_classifier(DHTR_T, LHTR_T, DHTR_E, 16, 0.001, version="diagonal"), LHTR_E, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("diagonal", 16, 0.001, DCF_act), " (noise version)\n")
+
+
+                # SVM Quad. K=1, C=0.1, c=0, d=2
+                DCF_act= actual_detection_cost(svm_kernel_polynomial(DHTR_T, LHTR_T, DHTR_E, 1, 0.1, d=2, c=0), LHTR_E, pi1, Cfn, Cfp)
+                print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, actDCF = %f" %(1, 0.1, 0, DCF_act)," (noise version)\n")
+                    
+
+            K = 5 
+            print("-" * 50)
+            print("K FOLD: K = %d" %(K))
+            print("-" * 50, "\n\n")
+
+            for app in applications:
+                pi1, Cfn, Cfp = app
+                print("-" * 50)
+                print("Application: pi1 = %.1f, Cfn = %d, Cfn = %d" % (pi1, Cfn, Cfp))
+                print("-" * 50, "\n")
+
+                # normal dataset
+
+                # MVG full
+
+                llr, labels = k_fold(DTR, LTR, K, multivariate_gaussian_classifier2)
+                DCF_min = actual_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                print("%s: actDCF = %f" %("MVG",DCF_act),"\n")
+
+                # GMM full M = 2
+                llr, labels = k_fold(DTR, LTR, K, GMM_classifier, (2, 0.001, "full"))
+                DCF_act= actual_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 2, 0.001, DCF_act), "\n")
+
+                # SVM RBF K=1, C=10, g=1
+                llr, labels = k_fold(DTR, LTR, K, svm_kernel_RBF, (1, 10,1))
+                DCF_act = actual_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                print("SVM RBF Kernel: K = %f, C = %f, g = %f, actDCF = %f" %(1, 10, 1, DCF_act),"\n")
+
+                # degraded dataset
+
+                # GMM full M = 4
+                llr, labels = k_fold(DHTR, LHTR, K, GMM_classifier, (4, 0.001, "full"))
+                DCF_act= actual_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 4, 0.001, DCF_act), " (noise version)\n")
+
+                # GMM diagonal M = 16
+                llr, labels = k_fold(DHTR, LHTR, K, GMM_classifier, (16, 0.001, "diagonal"))
+                DCF_act= actual_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("diagonal", 16, 0.001, DCF_act), " (noise version)\n")
+
+                # SVM Quad. K=1, C=0.1, c=0, d=2
+
+                llr, labels = k_fold(DHTR, LHTR, K, svm_kernel_polynomial, (1, 0.1, 2, 0))
+                DCF_act= actual_detection_cost(llr, labels, pi1, Cfn, Cfp)
+                print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, actDCF = %f" %(1, 0.1, 0, DCF_act)," (noise version)\n")
  
-
-
     # TESTING
     if FLAG_TESTING:
 
@@ -351,7 +438,7 @@ if __name__ == "__main__":
 
 
         # K-FOLD: using all training data for the models
-        if FLAG_SINGLEFOLD:
+        if FLAG_KFOLD:
 
             print("-" * 50)
             print("K FOLD")
@@ -435,19 +522,91 @@ if __name__ == "__main__":
                             DCF_min = minimum_detection_cost(GMM_classifier(DHTR, LHTR, DHTE, M, psi, version=version), LHTE, pi1, Cfn, Cfp)
                             print("GMM: version = %s, M = %d, psi = %f, minDCF = %f" % (version, M, psi, DCF_min), "(noise version)\n")
 
+        if FLAG_ACTUALDCF:
+            # Calculate Actual DCF for the chosen models
+            print("\n\nCOMPUTING actDCF for various models...\n\n")
+
+            print("-" * 50)
+            print("SINGLE FOLD")
+            print("-" * 50, "\n\n")
+
+            for app in applications:
+                pi1, Cfn, Cfp = app
+                print("-" * 50)
+                print("Application: pi1 = %.1f, Cfn = %d, Cfn = %d" % (pi1, Cfn, Cfp))
+                print("-" * 50, "\n")
+
+                # normal dataset
+
+                # MVG full
+                DCF_act= actual_detection_cost(multivariate_gaussian_classifier2(DTR_T, LTR_T, DTE), LTE, pi1, Cfn, Cfp)
+                print("%s: actDCF = %f" %("MVG",DCF_act),"\n")
+
+                # GMM full M = 2
+                DCF_act= actual_detection_cost(GMM_classifier(DTR_T, LTR_T, DTE, 2, 0.001, version="full"), LTE, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 2, 0.001, DCF_act), "\n")
+
+                # SVM RBF K=1, C=10, g=1
+                DCF_act = actual_detection_cost(svm_kernel_RBF(DTR_T, LTR_T, DTE, 1, 10, g=1), LTE, pi1, Cfn, Cfp)
+                print("SVM RBF Kernel: K = %f, C = %f, g = %f, actDCF = %f" %(1, 10, 1, DCF_act),"\n")
+                     
+                # degraded dataset
+
+                # GMM full M = 4
+                DCF_act= actual_detection_cost(GMM_classifier(DHTR_T, LHTR_T, DHTE, 4, 0.001, version="full"), LHTE, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 4, 0.001, DCF_act), " (noise version)\n")
+
+                # GMM diagonal M = 16
+                DCF_act= actual_detection_cost(GMM_classifier(DHTR_T, LHTR_T, DHTE, 16, 0.001, version="diagonal"), LHTE, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("diagonal", 16, 0.001, DCF_act), " (noise version)\n")
 
 
+                # SVM Quad. K=1, C=0.1, c=0, d=2
+                DCF_act= actual_detection_cost(svm_kernel_polynomial(DHTR_T, LHTR_T, DHTE, 1, 0.1, d=2, c=0), LHTE, pi1, Cfn, Cfp)
+                print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, actDCF = %f" %(1, 0.1, 0, DCF_act)," (noise version)\n")
+                    
 
-       
+            K = 5 
+            print("-" * 50)
+            print("K FOLD: K = %d" %(K))
+            print("-" * 50, "\n\n")
+
+            for app in applications:
+                pi1, Cfn, Cfp = app
+                print("-" * 50)
+                print("Application: pi1 = %.1f, Cfn = %d, Cfn = %d" % (pi1, Cfn, Cfp))
+                print("-" * 50, "\n")
 
 
+                # normal dataset
+
+                # MVG full
+                DCF_act= actual_detection_cost(multivariate_gaussian_classifier2(DTR, LTR, DTE), LTE, pi1, Cfn, Cfp)
+                print("%s: actDCF = %f" %("MVG",DCF_act),"\n")
+
+                # GMM full M = 2
+                DCF_act= actual_detection_cost(GMM_classifier(DTR, LTR, DTE, 2, 0.001, version="full"), LTE, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 2, 0.001, DCF_act), "\n")
+
+                # SVM RBF K=1, C=10, g=1
+                DCF_act = actual_detection_cost(svm_kernel_RBF(DTR, LTR, DTE, 1, 10, g=1), LTE, pi1, Cfn, Cfp)
+                print("SVM RBF Kernel: K = %f, C = %f, g = %f, actDCF = %f" %(1, 10, 1, DCF_act),"\n")
+                     
+                # degraded dataset
+
+                # GMM full M = 4
+                DCF_act= actual_detection_cost(GMM_classifier(DHTR, LHTR, DHTE, 4, 0.001, version="full"), LHTE, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("full", 4, 0.001, DCF_act), " (noise version)\n")
+
+                # GMM diagonal M = 16
+                DCF_act= actual_detection_cost(GMM_classifier(DHTR, LHTR, DHTE, 16, 0.001, version="diagonal"), LHTE, pi1, Cfn, Cfp)
+                print("GMM: version = %s, M = %d, psi = %f, actDCF = %f" % ("diagonal", 16, 0.001, DCF_act), " (noise version)\n")
 
 
-
-
-
-       
-
+                # SVM Quad. K=1, C=0.1, c=0, d=2
+                DCF_act= actual_detection_cost(svm_kernel_polynomial(DHTR, LHTR, DHTE, 1, 0.1, d=2, c=0), LHTE, pi1, Cfn, Cfp)
+                print("SVM Polynomial Kernel: K = %f, C = %f, d = 2, c = %f, actDCF = %f" %(1, 0.1, 0, DCF_act)," (noise version)\n")
+                 
 
 
 
