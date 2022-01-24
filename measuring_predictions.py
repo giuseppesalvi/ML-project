@@ -5,6 +5,7 @@
 import numpy as np
 from numpy.lib.scimath import log
 
+
 def confusion_matrix(predicted_labels, real_labels, K):
     """ Computes the confusion matrix given the predicted labels and
         the real labels
@@ -66,6 +67,8 @@ def empirical_bayes_risk(confusion_matrix, pi1, Cfn, Cfp):
     DCF = pi1 * Cfn * FNR + (1-pi1) * Cfp * FPR
 
     return DCF
+
+
 def normalized_detection_cost(DCF, pi1, Cfn, Cfp):
     """ Computes the normalized detection cost, given the detection cost DCF,
         and the parameters of the application, pi1, Cfn, Cfp
@@ -130,5 +133,4 @@ def actual_detection_cost(llr, labels, pi1, Cfn, Cfp):
     DCF = empirical_bayes_risk(conf, pi1, Cfn, Cfp)
     DCF_norm = normalized_detection_cost(DCF, pi1, Cfn, Cfp)
 
-    return DCF_norm 
-
+    return DCF_norm

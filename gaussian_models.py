@@ -6,11 +6,13 @@ import numpy as np
 import sklearn.datasets as da
 import scipy as sp
 
+
 def vcol(x):
-    """ reshape the vector x into a column vector """
+    """ Reshape the vector x into a column vector """
 
     return x.reshape(x.shape[0], 1)
-    
+
+
 def covariance_matrix2(D):
     """ Computes and returns the covariance matrix given the dataset D
         this is a more efficient implementation
@@ -46,7 +48,7 @@ def logpdf_GAU_ND(x, mu, C):
 
 
 def multivariate_gaussian_classifier2(DTR, LTR, DTE):
-    """ implementation of the  Multivariate Gaussian Classifier
+    """ Implementation of the  Multivariate Gaussian Classifier
         using log_densities
         DTR and LTR are training data and labels
         DTE are evaluation data 
@@ -74,10 +76,10 @@ def multivariate_gaussian_classifier2(DTR, LTR, DTE):
 
     # return llr
     return S[1] - S[0]
-    
+
 
 def naive_bayes_gaussian_classifier(DTR, LTR, DTE):
-    """ implementation of the  Naive Bayes Gaussian Classifier
+    """ Implementation of the  Naive Bayes Gaussian Classifier
         based on MVG version with log_densities,
         covariance matrixes are diagonal
         DTR and LTR are training data and labels
@@ -114,7 +116,7 @@ def naive_bayes_gaussian_classifier(DTR, LTR, DTE):
 
 
 def within_class_covariance_matrix(DTR, LTR):
-    """ computes the within class covariance matrix SW for the dataset D"""
+    """ Computes the within class covariance matrix SW for the dataset D"""
 
     # select the samples of the i-th class
     DTR0 = DTR[:, LTR == 0]
@@ -125,13 +127,12 @@ def within_class_covariance_matrix(DTR, LTR):
     C0 = covariance_matrix2(DTR0)
     C1 = covariance_matrix2(DTR1)
     SW = (DTR0.shape[1] * C0 +
-          DTR1.shape[1] * C1 ) / DTR.shape[1]
+          DTR1.shape[1] * C1) / DTR.shape[1]
     return SW
 
 
-
 def tied_covariance_gaussian_classifier(DTR, LTR, DTE):
-    """ implementation of the Tied Covariance Gaussian Classifier
+    """ Implementation of the Tied Covariance Gaussian Classifier
         based on MVG version with log_densities
         DTR and LTR are training data and labels
         DTE are evaluation data

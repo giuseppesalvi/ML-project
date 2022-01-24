@@ -5,19 +5,22 @@ import numpy as np
 import scipy.special as sps
 from gaussian_models import covariance_matrix2, logpdf_GAU_ND
 
+
 def vcol(x):
-    """ reshape the vector x into a column vector """
+    """ Reshape the vector x into a column vector """
     return x.reshape(x.shape[0], 1)
 
+
 def vrow(x):
-    """ reshape the vector x into a row vector """
+    """ Reshape the vector x into a row vector """
     return x.reshape(1, x.shape[0])
 
 
 def mcol(x):
-    """ reshape row vector into col vector: (1, N) -> (N, 1)"""
-    #return x.reshape(x.shape[1], 1)
+    """ Reshape row vector into col vector: (1, N) -> (N, 1)"""
+    # return x.reshape(x.shape[1], 1)
     return x.reshape((x.size, 1))
+
 
 def logpdf_GMM(X, gmm):
     """ Computes the log-density of a gmm for a set of samples contained in 
@@ -129,7 +132,7 @@ def EM_algorithm(X, initial_gmm, psi=0.01, printDetails=False, version="full"):
                     np.dot(vcol(X.T[i]), vrow(X.T[i]))
             Sg_list.append(tmp)
 
-        sum_covariances = np.zeros((F,F)) # used for tied covariance version
+        sum_covariances = np.zeros((F, F))  # used for tied covariance version
         # Obtain the new paramters
         for g in range(M):
             w_new = (Zg_list[g] / sum(Zg_list))[0]  # extract the float
@@ -148,15 +151,14 @@ def EM_algorithm(X, initial_gmm, psi=0.01, printDetails=False, version="full"):
             # Constraining the eigenvalues of the covariance matrices to be
             # larger or equal to psi
             U, s, _ = np.linalg.svd(sigma_new)
-            s[s<psi] = psi
-            sigma_new = np.dot(U, vcol(s) * U.T) 
+            s[s < psi] = psi
+            sigma_new = np.dot(U, vcol(s) * U.T)
 
             gmm[g] = (w_new, mu_new, sigma_new)
 
         for g in gmm:
             if(version == "tied"):
-                g = (g[0], g[1], sum_covariances / N) 
-
+                g = (g[0], g[1], sum_covariances / N)
 
         # Check stopping criterion
         threshold = 1e-6
@@ -195,7 +197,7 @@ def LBG_algorithm(X, gmm=None, goal_components=None, alpha=0.1, psi=0.01, printD
     # g[2] is the covariance matrix
     for g in gmm:
         U, s, _ = np.linalg.svd(g[2])
-        s[s<psi] = psi
+        s[s < psi] = psi
         g = (g[0], g[1], np.dot(U, vcol(s)*U.T))
 
     if (goal_components == None):
@@ -214,7 +216,7 @@ def LBG_algorithm(X, gmm=None, goal_components=None, alpha=0.1, psi=0.01, printD
             # Constraining the eigenvalues of the covariance matrices
             # g[2] is the covariance matrix
             U, s, _ = np.linalg.svd(g[2])
-            s[s<psi] = psi
+            s[s < psi] = psi
             g = (g[0], g[1], np.dot(U, vcol(s)*U.T))
 
             U, s, Vh = np.linalg.svd(g[2])
@@ -233,17 +235,17 @@ def LBG_algorithm(X, gmm=None, goal_components=None, alpha=0.1, psi=0.01, printD
 
     return gmm
 
+
 def GMM_classifier(DTR, LTR, DTE,  M, psi, version="full",):
-    """
-        Implementation of the GMM classifier for binary classification
-    """
+    """ Implementation of the GMM classifier for binary classification """
 
     DTR0 = DTR[:, LTR == 0]
     DTR1 = DTR[:, LTR == 1]
 
-
-    gmm0 = LBG_algorithm(DTR0, goal_components=M, psi=psi, version=version, printDetails=False)
-    gmm1 = LBG_algorithm(DTR1, goal_components=M, psi=psi, version=version, printDetails=False)
+    gmm0 = LBG_algorithm(DTR0, goal_components=M, psi=psi,
+                         version=version, printDetails=False)
+    gmm1 = LBG_algorithm(DTR1, goal_components=M, psi=psi,
+                         version=version, printDetails=False)
 
     S0 = logpdf_GMM(DTE, gmm0)
     S1 = logpdf_GMM(DTE, gmm1)

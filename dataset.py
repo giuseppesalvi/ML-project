@@ -166,8 +166,9 @@ def split_db_2to1(D, L, seed=0):
 
     return (DTR, LTR), (DTE, LTE)
 
+
 def k_fold(D, L, K, algorithm, params=None, seed=0):
-    """ implementation of the k-fold cross validation approach
+    """ Implementation of the k-fold cross validation approach
         D is the dataset, L the labels, K the number of folds
         pi1, Cfn, Cfp are the parameters of the application
         algorithm is the algorithm used as classifier
@@ -185,8 +186,7 @@ def k_fold(D, L, K, algorithm, params=None, seed=0):
     for i in range(0, D.shape[1], sizePartitions):
         idx_partitions.append(list(idx_permutation[i:i+sizePartitions]))
 
-    
-    all_llr= []
+    all_llr = []
     all_labels = []
 
     # for each fold, consider the ith partition in the test set
@@ -216,18 +216,17 @@ def k_fold(D, L, K, algorithm, params=None, seed=0):
         all_llr.append(llr)
         all_labels.append(LTE)
 
-
-    all_llr = np.hstack(all_llr) 
+    all_llr = np.hstack(all_llr)
     all_labels = np.hstack(all_labels)
 
-    #if algorithm == logistic_regression:
-        ## We can recover log-likelihood ratios by subtracting from the score s
-        ## the empirical prior log-odds of the training set (slide 31)
-        #all_llr = all_llr - log(pi1/ (1-pi1))   
+    # if algorithm == logistic_regression:
+    # We can recover log-likelihood ratios by subtracting from the score s
+    # the empirical prior log-odds of the training set (slide 31)
+    #all_llr = all_llr - log(pi1/ (1-pi1))
 
-    #DCF_min = minimum_detection_cost(all_llr, all_labels, pi1, Cfn, Cfp) 
-    
-    return all_llr, all_labels 
+    #DCF_min = minimum_detection_cost(all_llr, all_labels, pi1, Cfn, Cfp)
+
+    return all_llr, all_labels
 
 
 if __name__ == "__main__":
