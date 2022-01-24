@@ -13,8 +13,8 @@ from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 
 
 # Flags to execute only some algorithms
-FLAG_TRAINING = True 
-FLAG_TESTING = False 
+FLAG_TRAINING = False 
+FLAG_TESTING = True 
 
 FLAG_SINGLEFOLD = True 
 FLAG_KFOLD = True 
