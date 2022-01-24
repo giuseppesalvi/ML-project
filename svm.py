@@ -5,16 +5,22 @@ import numpy as np
 import scipy.optimize as op
 
 def mcol(v):
+    """ reshape the vector v into a column vector"""
     return v.reshape((v.size, 1))
 
 def mrow(v):
+    """ reshape the vector v into a row vector"""
     return v.reshape((1, v.size))
 
 def svm_dual_wrapper(DTR, LTR, K):
     """
+        Wrapper for the svm_dual to pass to it the parameters
+        DTR, LTR and K
     """
     def svm_dual(alpha):
-        """
+        """ 
+            Computes the dual SVM solution
+            returns L_D_hat = - J_D_hat, and the gradient of L_D_hat
         """
         N = DTR.shape[1]
 
@@ -40,6 +46,8 @@ def svm_dual_wrapper(DTR, LTR, K):
 
 def svm_primal_from_dual(alpha, DTR, LTR, K):
     """
+        Recover the primal svm solution from the dual
+        alpha is the primal solution
     """
     N = LTR.shape[0]
     z = mcol(np.array(2 * LTR - 1))
@@ -50,6 +58,7 @@ def svm_primal_from_dual(alpha, DTR, LTR, K):
 
 def svm_primal_objective(w_s_hat, DTR, LTR, K, C):
     """
+        Compute the svm primal objective
     """
     N = LTR.shape[0]
     z = mrow(np.array(2 * LTR - 1))
@@ -62,12 +71,20 @@ def svm_primal_objective(w_s_hat, DTR, LTR, K, C):
 
 def polynomial_kernel(X1, X2, c, d, gamma):
     """
+        Implementation of polynomial kernel function
+        k(X1, X2) = (X1.T @ X2 + C) ^ d
+        the parameter gamma is not used, it is for compatibility
+        with other kernel functions
     """
     return (np.dot(X1.T, X2) + c) ** d
 
 
 def RBF_kernel(X1, X2, c, d, gamma):
     """
+        Implementeation of RBF kernel function
+        k(X1, X2) = e ^ (-gamma (norm(X1 - X2)) ^ 2)
+        the parameters c and d are not used, it is for compatibility
+        with other kernel functions
     """
     X1 = X1.T
     X2 = X2.T
@@ -82,9 +99,13 @@ def RBF_kernel(X1, X2, c, d, gamma):
 
 def svm_dual_kernel_wrapper(DTR, LTR, kernel, K, c, d, gamma):
     """
+        Wrapper for the svm_dual_kernel 
+        to pass to it the parameters DTR, LTR and K
     """
     def svm_dual_kernel(alpha):
-        """
+        """ 
+            Computes the dual SVM solution using kernel function
+            returns L_D_hat = - J_D_hat, and the gradient of L_D_hat
         """
         N = DTR.shape[1]
 
@@ -109,6 +130,7 @@ def svm_dual_kernel_wrapper(DTR, LTR, kernel, K, c, d, gamma):
 
 def svm_linear(DTR, LTR, DTE, K, C):
     """
+        Implementation of the svm linear classifier
     """
 
     N = DTR.shape[1]
@@ -133,6 +155,9 @@ def svm_linear(DTR, LTR, DTE, K, C):
     return S.reshape(S.size,)
 
 def svm_kernel_polynomial(DTR, LTR, DTE, K, C, d=2, c=0):
+    """
+        Implementation of the svm classifier using polynomial kernel function
+    """
     N = DTR.shape[1]
     # starting point
     x0 = np.zeros(N)
@@ -159,6 +184,7 @@ def svm_kernel_polynomial(DTR, LTR, DTE, K, C, d=2, c=0):
 
 def svm_kernel_RBF(DTR, LTR, DTE, K, C, g):
     """
+        Implementation of the svm classifier using RBF kernel function
     """
     N = DTR.shape[1]
     # starting point

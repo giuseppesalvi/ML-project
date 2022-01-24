@@ -1,5 +1,5 @@
 """
-    main module, where all models are imported and executed
+    Main module, where all models are imported and executed
 """
 
 from dataset import k_fold, load_train, load_test, load_trainH, load_testH, split_db_2to1
@@ -13,8 +13,8 @@ from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 
 
 # Flags to execute only some algorithms
-FLAG_TRAINING = False 
-FLAG_TESTING = True 
+FLAG_TRAINING = True 
+FLAG_TESTING = False 
 
 FLAG_SINGLEFOLD = True 
 FLAG_KFOLD = True 
@@ -22,7 +22,7 @@ FLAG_KFOLD = True
 FLAG_GAUSSIANS = False 
 FLAG_LOGREG = False 
 FLAG_SVM = False 
-FLAG_GMM = False 
+FLAG_GMM = True 
 
 FLAG_ACTUALDCF = True
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
                     generative_models = [("MVG", multivariate_gaussian_classifier2), ("Naive", naive_bayes_gaussian_classifier), ("Tied", tied_covariance_gaussian_classifier)]
                     for name, algo in generative_models:
                         DCF_min = minimum_detection_cost(algo(DTR_T, LTR_T, DTR_E), LTR_E, pi1, Cfn, Cfp)
-                        print("%s: minDCF = %f" %(name,DCF_min),"\n") # 0.0 for MVG and tied!!
+                        print("%s: minDCF = %f" %(name,DCF_min),"\n") 
                         DCF_min = minimum_detection_cost(algo(DHTR_T, LHTR_T, DHTR_E), LHTR_E, pi1, Cfn, Cfp)
                         print("%s: minDCF = %f" %(name,DCF_min)," (noise version)\n") 
                     print("")
@@ -94,14 +94,14 @@ if __name__ == "__main__":
                         # the empirical prior log-odds of the training set (slide 31)
                         llr = S - log(pi1/ (1-pi1))
                         DCF_min = minimum_detection_cost(llr, LTR_E, pi1, Cfn, Cfp)
-                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"\n") # 0.0 for MVG and tied!!
+                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"\n") 
 
                         S = logistic_regression(DHTR_T, LHTR_T, DHTR_E, l)
                         # We can recover log-likelihood ratios by subtracting from the score s
                         # the empirical prior log-odds of the training set (slide 31)
                         llr = S - log(pi1/ (1-pi1))
                         DCF_min = minimum_detection_cost(llr, LHTR_E, pi1, Cfn, Cfp)
-                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") # 0.0 for MVG and tied!!
+                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") 
 
                 # SVM
                 if FLAG_SVM:
@@ -384,14 +384,14 @@ if __name__ == "__main__":
                         # the empirical prior log-odds of the training set (slide 31)
                         llr = S - log(pi1/ (1-pi1))
                         DCF_min = minimum_detection_cost(llr, LTE, pi1, Cfn, Cfp)
-                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"\n") # 0.0 for MVG and tied!!
+                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"\n") 
 
                         S = logistic_regression(DHTR_T, LHTR_T, DHTE, l)
                         # We can recover log-likelihood ratios by subtracting from the score s
                         # the empirical prior log-odds of the training set (slide 31)
                         llr = S - log(pi1/ (1-pi1))
                         DCF_min = minimum_detection_cost(llr, LHTE, pi1, Cfn, Cfp)
-                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") # 0.0 for MVG and tied!!
+                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") 
 
                 # SVM
                 if FLAG_SVM:
@@ -470,14 +470,14 @@ if __name__ == "__main__":
                         # the empirical prior log-odds of the training set (slide 31)
                         llr = S - log(pi1/ (1-pi1))
                         DCF_min = minimum_detection_cost(llr, LTE, pi1, Cfn, Cfp)
-                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"\n") # 0.0 for MVG and tied!!
+                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min),"\n")
 
                         S = logistic_regression(DHTR, LHTR, DHTE, l)
                         # We can recover log-likelihood ratios by subtracting from the score s
                         # the empirical prior log-odds of the training set (slide 31)
                         llr = S - log(pi1/ (1-pi1))
                         DCF_min = minimum_detection_cost(llr, LHTE, pi1, Cfn, Cfp)
-                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") # 0.0 for MVG and tied!!
+                        print("Logistic Regression: lambda = %f, minDCF = %f" %(l,DCF_min)," (noise version)\n") 
 
                 # SVM
                 if FLAG_SVM:
