@@ -14,14 +14,14 @@ from svm import svm_kernel_RBF, svm_kernel_polynomial, svm_linear
 
 # Flags to execute only some algorithms
 FLAG_TRAINING = True
-FLAG_TESTING = False
+FLAG_TESTING = True 
 
 FLAG_SINGLEFOLD = True
 FLAG_KFOLD = True
 
-FLAG_GAUSSIANS = False
-FLAG_LOGREG = False
-FLAG_SVM = False
+FLAG_GAUSSIANS = True 
+FLAG_LOGREG = True  
+FLAG_SVM = True 
 FLAG_GMM = True
 
 FLAG_ACTUALDCF = True
